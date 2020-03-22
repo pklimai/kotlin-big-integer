@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 
-
+@kotlin.ExperimentalUnsignedTypes
 class BigIntegerConstructorTest {
     @Test
     fun testConstructorZero() {
@@ -24,6 +24,7 @@ class BigIntegerConstructorTest {
     }
 }
 
+@kotlin.ExperimentalUnsignedTypes
 class BigIntegerCompareTest {
     @Test
     fun testCompare1_2() {
@@ -71,28 +72,28 @@ class BigIntegerCompareTest {
     fun testEqualsWithInt() {
         val x = TBigInteger(-12345)
         // TODO: replace with ==
-        assertTrue { x.equals(-12345) }
+        assertTrue { x.equals(TBigInteger(-12345)) }
     }
 
     @Test
     fun testEqualsWithUInt() {
         val x = TBigInteger(12345)
         // TODO: replace with ==
-        assertTrue { x.equals(12345U) }
+        assertTrue { x.equals(TBigInteger(12345U)) }
     }
 
     @Test
     fun testEqualsWithLong() {
         val x = TBigInteger(12345)
         // TODO: replace with ==
-        assertTrue { x.equals(12345L) }
+        assertTrue { x.equals(TBigInteger(12345L)) }
     }
 
     @Test
     fun testEqualsWithULong() {
         val x = TBigInteger(12345)
         // TODO: replace with ==
-        assertTrue { x.equals(12345UL) }
+        assertTrue { x.equals(TBigInteger(12345UL)) }
     }
 
     @Test
@@ -117,6 +118,7 @@ class BigIntegerCompareTest {
     }
 }
 
+@kotlin.ExperimentalUnsignedTypes
 class BigIntegerOperationsTest {
     @Test
     fun testPlus_1_1() {
@@ -401,7 +403,7 @@ class BigIntegerOperationsTest {
     }
 }
 
-
+@kotlin.ExperimentalUnsignedTypes
 class BigIntegerConversionsTest {
     @Test
     fun testToString0x10() {

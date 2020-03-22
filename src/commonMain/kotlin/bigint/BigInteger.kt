@@ -5,27 +5,36 @@ import kotlin.math.sign
 import kotlin.Int
 import kotlin.math.max
 
-
+@kotlin.ExperimentalUnsignedTypes
 typealias TMagnitude = UIntArray
+
+@kotlin.ExperimentalUnsignedTypes
 typealias TBase = ULong
 
-class TBigInteger constructor(
+@kotlin.ExperimentalUnsignedTypes
+class TBigInteger(
     sign: Int = 0,
     magnitude: TMagnitude = TMagnitude(0)
-) : Number(), Comparable<TBigInteger> {
+): Number(), Comparable<TBigInteger> {
+
+    constructor(x: Int) : this(x.sign, uintArrayOf(abs(x).toUInt()))
+    constructor(x: Long) : this(x.sign, uintArrayOf((abs(x).toULong() and BASE).toUInt(), ((abs(x).toULong() shr BASE_SIZE) and BASE).toUInt()))
 
     val magnitude = stripLeadingZeros(magnitude)
     val sign = if (this.magnitude.isNotEmpty()) sign else 0
     val sizeByte: Int = magnitude.size * BASE_SIZE / 4
 
     companion object {
-        //        TODO: Rename
         val BASE = 0xffffffffUL
         const val BASE_SIZE: Int = 32
-        private val hexMapping: HashMap<UInt, String> = hashMapOf(0U to "0", 1U to "1", 2U to "2", 3U to "3", 4U to "4", 5U to "5", 6U to "6", 7U to "7", 8U to "8", 9U to "9", 10U to "a", 11U to "b", 12U to "c", 13U to "d", 14U to "e", 15U to "f")
-
         val ZERO: TBigInteger = TBigInteger()
         val ONE: TBigInteger = TBigInteger(1)
+
+        private val hexMapping: HashMap<UInt, String> =
+            hashMapOf(
+                0U to "0", 1U to "1", 2U to "2", 3U to "3", 4U to "4", 5U to "5", 6U to "6", 7U to "7", 8U to "8",
+                9U to "9", 10U to "a", 11U to "b", 12U to "c", 13U to "d", 14U to "e", 15U to "f"
+            )
 
         private fun stripLeadingZeros(mag: TMagnitude): TMagnitude {
             // TODO: optimize performance
@@ -176,9 +185,6 @@ class TBigInteger constructor(
         }
     }
 
-    constructor(x: Int) : this(x.sign, uintArrayOf(abs(x).toUInt()))
-    constructor(x: Long) : this(x.sign, uintArrayOf((abs(x).toULong() and BASE).toUInt(), ((abs(x).toULong() shr BASE_SIZE) and BASE).toUInt()))
-
     override fun compareTo(other: TBigInteger): Int {
         return when {
             (this.sign == 0) and (other.sign == 0) -> 0
@@ -191,12 +197,12 @@ class TBigInteger constructor(
     override fun equals(other: Any?): Boolean {
         return when (other) {
             is TBigInteger -> this.compareTo(other) == 0
-            is Int -> this.compareTo(TBigInteger(other)) == 0
-            is Long -> this.compareTo(TBigInteger(other)) == 0
-            is UInt -> this.compareTo(TBigInteger(other)) == 0
-            is ULong -> this.compareTo(TBigInteger(other)) == 0
-            // TODO: implement for other types
-            else -> false
+//            is Int -> this.compareTo(TBigInteger(other)) == 0
+//            is Long -> this.compareTo(TBigInteger(other)) == 0
+//            is UInt -> this.compareTo(TBigInteger(other)) == 0
+//            is ULong -> this.compareTo(TBigInteger(other)) == 0
+//            else -> false
+            else -> error("Can't compare TBigInteger to a different type")
         }
     }
 
@@ -298,7 +304,7 @@ class TBigInteger constructor(
 
 
 
-
+// TODO
     override fun toChar(): Char {
         return '0'
     }
@@ -348,15 +354,20 @@ class TBigInteger constructor(
     }
 }
 
-fun TBigInteger(x: UInt): TBigInteger
-        = TBigInteger(1, uintArrayOf(x))
-fun TBigInteger(x: ULong): TBigInteger
-        = TBigInteger(1, uintArrayOf((x and TBigInteger.BASE).toUInt(), ((x shr TBigInteger.BASE_SIZE) and TBigInteger.BASE).toUInt()))
-
+@kotlin.ExperimentalUnsignedTypes
 fun abs(x: TBigInteger): TBigInteger {
     return if (x.sign == 0) x else TBigInteger(1, x.magnitude)
 }
 
+@kotlin.ExperimentalUnsignedTypes
+// Can't put it as constructor in class due to platform declaration clash with TBigInteger(Int)
+fun TBigInteger(x: UInt): TBigInteger
+        = TBigInteger(1, uintArrayOf(x))
+
+@kotlin.ExperimentalUnsignedTypes
+// Can't put it as constructor in class due to platform declaration clash with TBigInteger(Long)
+fun TBigInteger(x: ULong): TBigInteger
+        = TBigInteger(1, uintArrayOf((x and TBigInteger.BASE).toUInt(), ((x shr TBigInteger.BASE_SIZE) and TBigInteger.BASE).toUInt()))
 
 //class TBigIntegerIterator(
 //    var start: TBigInteger,
