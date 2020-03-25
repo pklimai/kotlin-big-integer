@@ -424,6 +424,17 @@ class BigIntegerConversionsTest {
     }
 }
 
+@kotlin.ExperimentalUnsignedTypes
+class MyTest {
+    @Test
+    fun testStings() {
+        println(TBigInteger(0xfffffffeabcdef01UL) / TBigInteger(0xfffffffeabc)  )
+        println(TBigInteger(+1, uintArrayOf(1000U, 1000U, 1000U)) / TBigInteger(0xfffffffeabc)  )
+        // >>> hex((1000 + 1000*2**32 + 1000*2**64)/ 0xfffffffeabc) == 0x3e800000L
+        println(TBigInteger(+1, TBigInteger.divideMagnitudeByUInt(uintArrayOf(1000U, 1000U, 1000U),456789U)))
+        // 0x8f789719813969L
+    }
+}
 
 //class BigIntegerIteratorTest {
 //    @Test

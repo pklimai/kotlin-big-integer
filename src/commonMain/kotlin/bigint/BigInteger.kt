@@ -1,9 +1,8 @@
 package bigint
 
 import kotlin.math.abs
-import kotlin.math.sign
-import kotlin.Int
 import kotlin.math.max
+import kotlin.math.sign
 
 @kotlin.ExperimentalUnsignedTypes
 typealias TMagnitude = UIntArray
@@ -137,7 +136,7 @@ class TBigInteger(
             return result
         }
 
-        private fun divideMagnitudeByUInt(mag: TMagnitude, x: UInt): TMagnitude {
+        public fun divideMagnitudeByUInt(mag: TMagnitude, x: UInt): TMagnitude {
             val resultLength: Int = mag.size
             val result = TMagnitude(resultLength)
             var carry: ULong = 0UL
@@ -150,7 +149,7 @@ class TBigInteger(
             return result
         }
 
-        private fun divideMagnitudes(mag1_: TMagnitude, mag2: TMagnitude): TMagnitude {
+        private fun divideMagnitudesOLD(mag1_: TMagnitude, mag2: TMagnitude): TMagnitude {
             val mag1 = ULongArray(mag1_.size) { mag1_[it].toULong() }
 
             val resultLength: Int = mag1.size - mag2.size + 1
@@ -183,7 +182,48 @@ class TBigInteger(
 
             return normalizedResult
         }
+
+        private fun divideMagnitudes(mag1_: TMagnitude, mag2: TMagnitude): TMagnitude {
+
+            val n = mag2.size
+            val m = mag1_.size - n
+
+            var u = UIntArray(m + n + 1) { mag1_[it] ?: 0U }
+            var v = mag2
+
+            val q = LongArray(m + 1)
+
+            //D1
+            val d = (BASE / v[n-1]).toUInt()    // BASE=b-1
+            val b = BASE + 1U
+
+            u = multiplyMagnitudeByUInt(u, d)
+            v = multiplyMagnitudeByUInt(v, d)
+
+            for (j in m downTo 0) {
+                var qhat = (u[n+j] * b + u[n+j-1]) / v[n-1]
+                var rhat = (u[n+j] * b + u[n+j-1]) % v[n-1]
+                if (qhat == b || qhat*v[n-2] > rhat*b+u[n-2+j]) {
+                    qhat -= 1U
+                    rhat += v[n-1]
+                }
+
+
+
+
+            }
+
+
+
+
+
+
+
+        }
+
     }
+
+
 
     override fun compareTo(other: TBigInteger): Int {
         return when {
@@ -286,8 +326,8 @@ class TBigInteger(
     }
 
     operator fun rem(other: TBigInteger): TBigInteger {
-        val a = (this / other)
-        val b = a * other
+//        val a = (this / other)
+//        val b = a * other
         return this - (this / other) * other
     }
 
