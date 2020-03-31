@@ -1,39 +1,29 @@
 package bigint
 
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.sign
+import kotlin.Int
+import kotlin.math.*
 
-@kotlin.ExperimentalUnsignedTypes
+
 typealias TMagnitude = UIntArray
-
-@kotlin.ExperimentalUnsignedTypes
 typealias TBase = ULong
 
-@kotlin.ExperimentalUnsignedTypes
-class TBigInteger(
+class TBigInteger constructor(
     sign: Int = 0,
     magnitude: TMagnitude = TMagnitude(0)
-): Number(), Comparable<TBigInteger> {
-
-    constructor(x: Int) : this(x.sign, uintArrayOf(abs(x).toUInt()))
-    constructor(x: Long) : this(x.sign, uintArrayOf((abs(x).toULong() and BASE).toUInt(), ((abs(x).toULong() shr BASE_SIZE) and BASE).toUInt()))
+) : Number(), Comparable<TBigInteger> {
 
     val magnitude = stripLeadingZeros(magnitude)
     val sign = if (this.magnitude.isNotEmpty()) sign else 0
     val sizeByte: Int = magnitude.size * BASE_SIZE / 4
 
     companion object {
+        //        TODO: Rename
         val BASE = 0xffffffffUL
         const val BASE_SIZE: Int = 32
+        private val hexMapping: HashMap<UInt, String> = hashMapOf(0U to "0", 1U to "1", 2U to "2", 3U to "3", 4U to "4", 5U to "5", 6U to "6", 7U to "7", 8U to "8", 9U to "9", 10U to "a", 11U to "b", 12U to "c", 13U to "d", 14U to "e", 15U to "f")
+
         val ZERO: TBigInteger = TBigInteger()
         val ONE: TBigInteger = TBigInteger(1)
-
-        private val hexMapping: HashMap<UInt, String> =
-            hashMapOf(
-                0U to "0", 1U to "1", 2U to "2", 3U to "3", 4U to "4", 5U to "5", 6U to "6", 7U to "7", 8U to "8",
-                9U to "9", 10U to "a", 11U to "b", 12U to "c", 13U to "d", 14U to "e", 15U to "f"
-            )
 
         private fun stripLeadingZeros(mag: TMagnitude): TMagnitude {
             // TODO: optimize performance
@@ -136,7 +126,7 @@ class TBigInteger(
             return result
         }
 
-        public fun divideMagnitudeByUInt(mag: TMagnitude, x: UInt): TMagnitude {
+        private fun divideMagnitudeByUInt(mag: TMagnitude, x: UInt): TMagnitude {
             val resultLength: Int = mag.size
             val result = TMagnitude(resultLength)
             var carry: ULong = 0UL
@@ -148,82 +138,10 @@ class TBigInteger(
             }
             return result
         }
-
-        private fun divideMagnitudesOLD(mag1_: TMagnitude, mag2: TMagnitude): TMagnitude {
-            val mag1 = ULongArray(mag1_.size) { mag1_[it].toULong() }
-
-            val resultLength: Int = mag1.size - mag2.size + 1
-            val result = LongArray(resultLength)
-
-            for (i in mag1.size - 1 downTo mag2.size - 1) {
-                val div: ULong = mag1[i] / mag2[mag2.size - 1]
-                result[i - mag2.size + 1] = div.toLong()
-                for (j in mag2.indices) {
-                    mag1[i - j] -= mag2[mag2.size - 1 - j] * div
-                }
-                if (i > 0) {
-                    mag1[i - 1] += (mag1[i] shl BASE_SIZE)
-                }
-            }
-
-            val normalizedResult = TMagnitude(resultLength)
-            var carry = 0L
-
-            for (i in result.indices) {
-                result[i] += carry
-                if (result[i] < 0L) {
-                    normalizedResult[i] = (result[i] + (BASE + 1UL).toLong()).toUInt()
-                    carry = -1
-                } else {
-                    normalizedResult[i] = result[i].toUInt()
-                    carry = 0
-                }
-            }
-
-            return normalizedResult
-        }
-
-        private fun divideMagnitudes(mag1_: TMagnitude, mag2: TMagnitude): TMagnitude {
-
-            val n = mag2.size
-            val m = mag1_.size - n
-
-            var u = UIntArray(m + n + 1) { mag1_[it] ?: 0U }
-            var v = mag2
-
-            val q = LongArray(m + 1)
-
-            //D1
-            val d = (BASE / v[n-1]).toUInt()    // BASE=b-1
-            val b = BASE + 1U
-
-            u = multiplyMagnitudeByUInt(u, d)
-            v = multiplyMagnitudeByUInt(v, d)
-
-            for (j in m downTo 0) {
-                var qhat = (u[n+j] * b + u[n+j-1]) / v[n-1]
-                var rhat = (u[n+j] * b + u[n+j-1]) % v[n-1]
-                if (qhat == b || qhat*v[n-2] > rhat*b+u[n-2+j]) {
-                    qhat -= 1U
-                    rhat += v[n-1]
-                }
-
-
-
-
-            }
-
-
-
-
-
-
-
-        }
-
     }
 
-
+    constructor(x: Int) : this(x.sign, uintArrayOf(abs(x).toUInt()))
+    constructor(x: Long) : this(x.sign, uintArrayOf((abs(x).toULong() and BASE).toUInt(), ((abs(x).toULong() shr BASE_SIZE) and BASE).toUInt()))
 
     override fun compareTo(other: TBigInteger): Int {
         return when {
@@ -237,12 +155,12 @@ class TBigInteger(
     override fun equals(other: Any?): Boolean {
         return when (other) {
             is TBigInteger -> this.compareTo(other) == 0
-//            is Int -> this.compareTo(TBigInteger(other)) == 0
-//            is Long -> this.compareTo(TBigInteger(other)) == 0
-//            is UInt -> this.compareTo(TBigInteger(other)) == 0
-//            is ULong -> this.compareTo(TBigInteger(other)) == 0
-//            else -> false
-            else -> error("Can't compare TBigInteger to a different type")
+            is Int -> this.compareTo(TBigInteger(other)) == 0
+            is Long -> this.compareTo(TBigInteger(other)) == 0
+            is UInt -> this.compareTo(TBigInteger(other)) == 0
+            is ULong -> this.compareTo(TBigInteger(other)) == 0
+            // TODO: implement for other types
+            else -> false
         }
     }
 
@@ -312,12 +230,103 @@ class TBigInteger(
         return TBigInteger(this.sign * other.sign, divideMagnitudeByUInt(this.magnitude, abs(other).toUInt()))
     }
 
+    private fun division(other: TBigInteger): Pair<TBigInteger, TBigInteger> {
+        // Super slow division https://en.wikipedia.org/wiki/Division_algorithm#Integer_division_(unsigned)_with_remainder
+        // TODO: Implement more effective algorithm
+        var q: TBigInteger = ZERO
+        var r: TBigInteger = ZERO
+
+        val bitSize = (BASE_SIZE * (this.magnitude.size - 1) + log2(this.magnitude.last().toFloat() + 1)).toInt()
+        for (i in bitSize downTo 0) {
+            r = r shl 1
+            r = r or ((abs(this) shr i) and ONE)
+            if (r >= abs(other)) {
+                r -= abs(other)
+                q += (ONE shl i)
+            }
+        }
+
+        return Pair(TBigInteger(this.sign * other.sign, q.magnitude), r)
+    }
+
     operator fun div(other: TBigInteger): TBigInteger {
         return when {
             this < other -> ZERO
             this == other -> ONE
-            else -> TBigInteger(this.sign * other.sign, divideMagnitudes(this.magnitude, other.magnitude))
+            else -> this.division(other).first
         }
+    }
+
+    infix fun shl(i: Int): TBigInteger {
+        if (this == ZERO) return ZERO
+        if (i == 0) return this
+
+        val fullShifts = i / BASE_SIZE + 1
+        val relShift = i % BASE_SIZE
+        val shiftLeft = {x: UInt -> if (relShift >= 32) 0U else x shl relShift}
+        val shiftRight = {x: UInt -> if (BASE_SIZE - relShift >= 32) 0U else x shr (BASE_SIZE - relShift)}
+
+        val newMagnitude: TMagnitude = TMagnitude(this.magnitude.size + fullShifts)
+
+        for (j in this.magnitude.indices) {
+            newMagnitude[j + fullShifts - 1] = shiftLeft(this.magnitude[j])
+            if (j != 0) {
+                newMagnitude[j + fullShifts - 1] = newMagnitude[j + fullShifts - 1] or shiftRight(this.magnitude[j - 1])
+            }
+        }
+
+        newMagnitude[this.magnitude.size + fullShifts - 1] = shiftRight(this.magnitude.last())
+
+        return TBigInteger(this.sign, newMagnitude)
+    }
+
+    infix fun shr(i: Int): TBigInteger {
+        if (this == ZERO) return ZERO
+        if (i == 0) return this
+
+        val fullShifts = i / BASE_SIZE
+        val relShift = i % BASE_SIZE
+        val shiftRight = {x: UInt -> if (relShift >= 32) 0U else x shr relShift}
+        val shiftLeft = {x: UInt -> if (BASE_SIZE - relShift >= 32) 0U else x shl (BASE_SIZE - relShift)}
+        if (this.magnitude.size - fullShifts <= 0) {
+            return ZERO
+        }
+        val newMagnitude: TMagnitude = TMagnitude(this.magnitude.size - fullShifts)
+
+        for (j in fullShifts until this.magnitude.size) {
+            newMagnitude[j - fullShifts] = shiftRight(this.magnitude[j])
+            if (j != this.magnitude.size - 1) {
+                newMagnitude[j - fullShifts] = newMagnitude[j - fullShifts] or shiftLeft(this.magnitude[j + 1])
+            }
+        }
+
+        return TBigInteger(this.sign, newMagnitude)
+    }
+
+    infix fun or(other: TBigInteger): TBigInteger {
+        if (this == ZERO) return other;
+        if (other == ZERO) return this;
+        val resSize = max(this.magnitude.size, other.magnitude.size)
+        val newMagnitude: TMagnitude = TMagnitude(resSize)
+        for (i in 0 until resSize) {
+            if (i < this.magnitude.size) {
+                newMagnitude[i] = newMagnitude[i] or this.magnitude[i]
+            }
+            if (i < other.magnitude.size) {
+                newMagnitude[i] = newMagnitude[i] or other.magnitude[i]
+            }
+        }
+        return TBigInteger(1, newMagnitude)
+    }
+
+    infix fun and(other: TBigInteger): TBigInteger {
+        if ((this == ZERO) or (other == ZERO)) return ZERO;
+        val resSize = min(this.magnitude.size, other.magnitude.size)
+        val newMagnitude: TMagnitude = TMagnitude(resSize)
+        for (i in 0 until resSize) {
+            newMagnitude[i] = this.magnitude[i] and other.magnitude[i]
+        }
+        return TBigInteger(1, newMagnitude)
     }
 
     operator fun rem(other: Int): Int {
@@ -326,9 +335,10 @@ class TBigInteger(
     }
 
     operator fun rem(other: TBigInteger): TBigInteger {
-//        val a = (this / other)
-//        val b = a * other
-        return this - (this / other) * other
+        return when {
+            this == ZERO -> ZERO
+            else -> this.division(other).second
+        }
     }
 
     fun modPow(exponent: TBigInteger, m: TBigInteger): TBigInteger {
@@ -342,9 +352,6 @@ class TBigInteger(
         }
     }
 
-
-
-// TODO
     override fun toChar(): Char {
         return '0'
     }
@@ -394,20 +401,15 @@ class TBigInteger(
     }
 }
 
-@kotlin.ExperimentalUnsignedTypes
+fun TBigInteger(x: UInt): TBigInteger
+        = TBigInteger(1, uintArrayOf(x))
+fun TBigInteger(x: ULong): TBigInteger
+        = TBigInteger(1, uintArrayOf((x and TBigInteger.BASE).toUInt(), ((x shr TBigInteger.BASE_SIZE) and TBigInteger.BASE).toUInt()))
+
 fun abs(x: TBigInteger): TBigInteger {
     return if (x.sign == 0) x else TBigInteger(1, x.magnitude)
 }
 
-@kotlin.ExperimentalUnsignedTypes
-// Can't put it as constructor in class due to platform declaration clash with TBigInteger(Int)
-fun TBigInteger(x: UInt): TBigInteger
-        = TBigInteger(1, uintArrayOf(x))
-
-@kotlin.ExperimentalUnsignedTypes
-// Can't put it as constructor in class due to platform declaration clash with TBigInteger(Long)
-fun TBigInteger(x: ULong): TBigInteger
-        = TBigInteger(1, uintArrayOf((x and TBigInteger.BASE).toUInt(), ((x shr TBigInteger.BASE_SIZE) and TBigInteger.BASE).toUInt()))
 
 //class TBigIntegerIterator(
 //    var start: TBigInteger,
