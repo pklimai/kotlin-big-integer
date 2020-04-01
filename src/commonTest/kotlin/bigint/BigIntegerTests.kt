@@ -405,6 +405,18 @@ class BigIntegerOperationsTest {
     }
 
     @Test
+    fun testBigDivision__1() {
+        val res = TBigInteger(+1, uintArrayOf(1000U, 1000U, 1000U)) / TBigInteger(456789U)
+        assertEquals(res, TBigInteger(0x8f789719813969L))
+    }
+
+    @Test
+    fun testBigDivision__2() {
+        val res = TBigInteger(+1, uintArrayOf(1000U, 1000U, 1000U)) / TBigInteger(0xfffffffeabc)
+        assertEquals(res, TBigInteger(0x3e800000L))
+    }
+
+    @Test
     fun testMod_20_3() {
         val x = TBigInteger(20)
         val y = 3
@@ -499,18 +511,6 @@ class BigIntegerConversionsTest {
     fun testToString_0x17ead2ffffd() {
         val x = TBigInteger(-0x17ead2ffffdL)
         assertEquals("-0x17ead2ffffd", x.toString())
-    }
-}
-
-@kotlin.ExperimentalUnsignedTypes
-class MyTest {
-    @Test
-    fun testStings() {
-        println(TBigInteger(0xfffffffeabcdef01UL) / TBigInteger(0xfffffffeabc)  )
-        println(TBigInteger(+1, uintArrayOf(1000U, 1000U, 1000U)) / TBigInteger(0xfffffffeabc)  )
-        // >>> hex((1000 + 1000*2**32 + 1000*2**64)/ 0xfffffffeabc) == 0x3e800000L
-        println(TBigInteger(+1, TBigInteger.divideMagnitudeByUInt(uintArrayOf(1000U, 1000U, 1000U),456789U)))
-        // 0x8f789719813969L
     }
 }
 
